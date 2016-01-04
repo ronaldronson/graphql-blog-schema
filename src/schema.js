@@ -25,27 +25,67 @@ import {
   DEFINE YOUR TYPES BELOW
 **/
 
-// This is the Root Query
+const Author = new GraphQLObjectType({
+  name: 'Author',
+  description: 'This represent an author',
+  fields: () => ({
+    _id: {type: new GraphQLNonNull(GraphQLString)},
+    name: {type: GraphQLString}
+  })
+});
+
+const Post = new GraphQLObjectType({
+  name: 'Post',
+  description: 'This represent a Post',
+  fields: () => ({
+    _id: {type: new GraphQLNonNull(GraphQLString)},
+    title: {type: new GraphQLNonNull(GraphQLString)},
+    author: {
+      type: Author,
+      resolve: function(post) {
+        return AuthorsList.find(a => a._id == post.author);
+      }
+    },
+    content: {type: GraphQLString}
+  })
+});
+
 const Query = new GraphQLObjectType({
   name: 'BlogSchema',
   description: 'Root of the Blog Schema',
   fields: () => ({
-    echo: {
-      type: GraphQLString,
-      description: 'Echo what you enter',
-      args: {
-        message: {type: GraphQLString}
-      },
-      resolve: function(source, {message}) {
-        return `received ${message}`;
+    posts: {
+      type: new GraphQLList(Post),
+      resolve: function() {
+        return PostsList;
       }
     }
   })
 });
 
+// This is the Root Query
+// const Query = new GraphQLObjectType({
+//   name: 'BlogSchema',
+//   description: 'Root of the Blog Schema',
+//   fields: () => ({
+//     echo: {
+//       type: GraphQLString,
+//       description: 'Echo what you enter',
+//       args: {
+//         message: {type: GraphQLString}
+//       },
+//       resolve: function(source, {message}) {
+//         return {aa: 10}; //`received ${message}`;
+//       }
+//     }
+//   })
+// });
+
 // The Schema
 const Schema = new GraphQLSchema({
   query: Query
 });
+
+
 
 export default Schema;
